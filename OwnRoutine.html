@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>sAIhat - Create Your Own Routine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #000000;
+        }
+        .gradient-text-red {
+            background: -webkit-linear-gradient(45deg, #ff2d2d, #ff7b7b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .neon-glow-text {
+            text-shadow: 0 0 5px rgba(255, 45, 45, 0.8), 0 0 10px rgba(255, 45, 45, 0.6);
+        }
+        .card-bg {
+            background-color: rgba(17, 17, 17, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 45, 45, 0.2);
+            position: relative;
+            overflow: hidden;
+            border-radius: 0.75rem;
+        }
+        .card-bg-light {
+            background-color: rgba(17, 17, 17, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .exercise-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .exercise-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(255, 45, 45, 0.2);
+        }
+        .exercise-tag {
+            background-color: rgba(255, 45, 45, 0.2);
+            border: 1px solid rgba(255, 45, 45, 0.4);
+            color: #ff7b7b;
+            font-size: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+        }
+        .filter-button.active {
+            color: #ff2d2d;
+            border-color: #ff2d2d;
+            background-color: rgba(255, 45, 45, 0.1);
+        }
+        .website-name {
+            font-weight: 800;
+            font-size: 1.5rem;
+            letter-spacing: -1px;
+            color: #f0f0f0;
+        }
+        .website-name .ai-part {
+            color: #e53e3e;
+            font-style: italic;
+        }
+        .your-plan-container {
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+<body class="text-white antialiased">
+    <div class="absolute top-0 left-0 w-full h-full bg-black"></div>
+
+    <div id="app" class="relative z-10 pb-4">
+
+        <header class="p-4 flex justify-between items-center">
+            <a href="Workout_Tracker.html" class="flex items-center gap-2 text-slate-300 hover:text-white transition-colors">
+                <i data-lucide="arrow-left" class="w-6 h-6"></i>
+                <span>Back</span>
+            </a>
+            <h1 class="website-name">s<span class="ai-part">AI</span>hat</h1>
+        </header>
+
+        <main class="p-4 flex flex-col gap-5">
+            <h1 class="text-3xl font-extrabold gradient-text-red neon-glow-text text-center">
+                Create Your Own Routine
+            </h1>
+            
+            <div class="card-bg p-4 rounded-xl mb-6">
+                <label for="schedule-date" class="text-slate-300 text-sm">Schedule for:</label>
+                <input type="date" id="schedule-date" class="bg-gray-800 text-white rounded-lg px-3 py-1 mt-2 w-full border border-gray-700">
+            </div>
+
+            <h2 class="text-xl font-bold mt-6 flex items-center gap-2">
+                <i data-lucide="library" class="w-6 h-6 text-red-500"></i> Exercise Library
+            </h2>
+
+            <div class="flex flex-wrap gap-2 mb-4">
+                <button class="filter-button bg-gray-800 hover:bg-red-500/20 text-slate-300 font-medium px-4 py-1.5 rounded-full border border-gray-700 active" data-filter="all">All</button>
+                <button class="filter-button bg-gray-800 hover:bg-red-500/20 text-slate-300 font-medium px-4 py-1.5 rounded-full border border-gray-700" data-filter="chest">Chest</button>
+                <button class="filter-button bg-gray-800 hover:bg-red-500/20 text-slate-300 font-medium px-4 py-1.5 rounded-full border border-gray-700" data-filter="legs">Legs</button>
+                <button class="filter-button bg-gray-800 hover:bg-red-500/20 text-slate-300 font-medium px-4 py-1.5 rounded-full border border-gray-700" data-filter="core">Core</button>
+                <button class="filter-button bg-gray-800 hover:bg-red-500/20 text-slate-300 font-medium px-4 py-1.5 rounded-full border border-gray-700" data-filter="full_body">Full Body</button>
+                <button class="filter-button bg-gray-800 hover:bg-red-500/20 text-slate-300 font-medium px-4 py-1.5 rounded-full border border-gray-700" data-filter="beginner">Beginner</button>
+                <button class="filter-button bg-gray-800 hover:bg-red-500/20 text-slate-300 font-medium px-4 py-1.5 rounded-full border border-gray-700" data-filter="intermediate">Intermediate</button>
+            </div>
+
+            <div id="exercise-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="card-bg card-bg-light rounded-xl exercise-card" data-categories="chest bodyweight beginner">
+                    <div>
+                        <p class="font-bold text-lg">Push-ups</p>
+                        <p class="text-xs text-slate-400">Chest • Bodyweight • Beginner</p>
+                    </div>
+                    <button class="add-exercise-btn bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-full">
+                        <i data-lucide="plus" class="w-4 h-4 inline-block mr-1"></i> Add
+                    </button>
+                </div>
+                <div class="card-bg card-bg-light rounded-xl exercise-card" data-categories="chest barbell intermediate">
+                    <div>
+                        <p class="font-bold text-lg">Bench Press</p>
+                        <p class="text-xs text-slate-400">Chest • Barbell • Intermediate</p>
+                    </div>
+                    <button class="add-exercise-btn bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-full">
+                        <i data-lucide="plus" class="w-4 h-4 inline-block mr-1"></i> Add
+                    </button>
+                </div>
+                <div class="card-bg card-bg-light rounded-xl exercise-card" data-categories="legs barbell intermediate">
+                    <div>
+                        <p class="font-bold text-lg">Squats</p>
+                        <p class="text-xs text-slate-400">Legs • Barbell • Intermediate</p>
+                    </div>
+                    <button class="add-exercise-btn bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-full">
+                        <i data-lucide="plus" class="w-4 h-4 inline-block mr-1"></i> Add
+                    </button>
+                </div>
+                <div class="card-bg card-bg-light rounded-xl exercise-card" data-categories="core bodyweight beginner">
+                    <div>
+                        <p class="font-bold text-lg">Plank</p>
+                        <p class="text-xs text-slate-400">Core • Bodyweight • Beginner</p>
+                    </div>
+                    <button class="add-exercise-btn bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-full">
+                        <i data-lucide="plus" class="w-4 h-4 inline-block mr-1"></i> Add
+                    </button>
+                </div>
+                <div class="card-bg card-bg-light rounded-xl exercise-card" data-categories="full_body bodyweight intermediate">
+                    <div>
+                        <p class="font-bold text-lg">Burpees</p>
+                        <p class="text-xs text-slate-400">Full Body • Bodyweight • Intermediate</p>
+                    </div>
+                    <button class="add-exercise-btn bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-full">
+                        <i data-lucide="plus" class="w-4 h-4 inline-block mr-1"></i> Add
+                    </button>
+                </div>
+            </div>
+        </main>
+        
+        <div id="your-plan-section" class="fixed bottom-0 left-0 right-0 hidden">
+            <div class="card-bg p-4 rounded-t-xl your-plan-container">
+                <div class="flex items-center gap-2 mb-4">
+                    <h3 class="text-xl font-bold flex items-center gap-2 text-red-500">
+                        <i data-lucide="notebook-pen" class="w-6 h-6"></i> Your Plan
+                    </h3>
+                </div>
+                <div class="flex-grow overflow-y-auto">
+                    <ul id="plan-list" class="space-y-4">
+                        </ul>
+                </div>
+                <div class="mt-auto pt-4 border-t border-gray-700">
+                    <button id="save-plan-btn" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-lg transition-colors">
+                        <i data-lucide="save" class="w-5 h-5 inline-block mr-2"></i> Save Plan
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    
+    <script>
+        lucide.createIcons();
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const yourPlanSection = document.getElementById('your-plan-section');
+            const planList = document.getElementById('plan-list');
+            const savePlanBtn = document.getElementById('save-plan-btn'); // New button ID
+            const scheduleDateInput = document.getElementById('schedule-date'); // New input ID
+            const filterButtons = document.querySelectorAll('.filter-button');
+            const exerciseCards = document.querySelectorAll('.exercise-card');
+            const addExerciseButtons = document.querySelectorAll('.add-exercise-btn');
+
+            let selectedExercises = [];
+            const DAILY_WORKOUTS_KEY = 'dailyWorkouts';
+
+            // Initialize date input with today's date
+            const today = new Date();
+            scheduleDateInput.value = today.toISOString().split('T')[0];
+
+            function renderPlan() {
+                planList.innerHTML = '';
+                if (selectedExercises.length > 0) {
+                    yourPlanSection.classList.remove('hidden');
+                    selectedExercises.forEach(exercise => {
+                        const li = document.createElement('li');
+                        li.className = 'flex items-center justify-between text-lg';
+                        li.innerHTML = `
+                            <span>${exercise.name}</span>
+                            <button class="remove-exercise-btn text-slate-400 hover:text-red-500" data-name="${exercise.name}">
+                                <i data-lucide="x" class="w-5 h-5"></i>
+                            </button>
+                        `;
+                        planList.appendChild(li);
+                    });
+                    lucide.createIcons();
+                } else {
+                    yourPlanSection.classList.add('hidden');
+                }
+            }
+
+            addExerciseButtons.forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const card = e.target.closest('.exercise-card');
+                    const exerciseName = card.querySelector('p:first-child').textContent;
+                    if (!selectedExercises.some(ex => ex.name === exerciseName)) {
+                        selectedExercises.push({ name: exerciseName });
+                        renderPlan();
+                    }
+                });
+            });
+
+            planList.addEventListener('click', (e) => {
+                if (e.target.closest('.remove-exercise-btn')) {
+                    const nameToRemove = e.target.closest('.remove-exercise-btn').dataset.name;
+                    selectedExercises = selectedExercises.filter(ex => ex.name.trim() !== nameToRemove.trim());
+                    renderPlan();
+                }
+            });
+
+            // Event listener for the new Save Plan button
+            savePlanBtn.addEventListener('click', () => {
+                if (selectedExercises.length > 0) {
+                    const date = scheduleDateInput.value;
+                    let dailyWorkouts = JSON.parse(localStorage.getItem(DAILY_WORKOUTS_KEY)) || {};
+                    
+                    // Save the current plan for the selected date
+                    dailyWorkouts[date] = {
+                        exercises: selectedExercises,
+                        completed: []
+                    };
+                    
+                    localStorage.setItem(DAILY_WORKOUTS_KEY, JSON.stringify(dailyWorkouts));
+                    alert(`Workout plan for ${date} has been saved!`);
+                    window.location.href = 'Workout_Tracker.html';
+                } else {
+                    alert('Please add at least one exercise to your plan!');
+                }
+            });
+
+            filterButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const filter = button.dataset.filter;
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    exerciseCards.forEach(card => {
+                        const categories = card.dataset.categories.split(' ');
+                        if (filter === 'all' || categories.includes(filter)) {
+                            card.style.display = 'flex';
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+                });
+            });
+
+            // Initialize with 'all' filter active
+            document.querySelector('.filter-button[data-filter="all"]').click();
+        });
+    </script>
+</body>
+</html>

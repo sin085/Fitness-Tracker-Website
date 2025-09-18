@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>sAIhat - Workout Player</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #000000;
+            color: #f0f0f0;
+        }
+        .gradient-text-red {
+            background: -webkit-linear-gradient(45deg, #ff2d2d, #ff7b7b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .neon-glow-text {
+            text-shadow: 0 0 5px rgba(255, 45, 45, 0.8), 0 0 10px rgba(255, 45, 45, 0.6);
+        }
+        .card-bg {
+            background-color: rgba(17, 17, 17, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 45, 45, 0.2);
+            position: relative;
+            overflow: hidden;
+            border-radius: 0.75rem;
+        }
+        .control-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        .btn-green {
+            background-color: #22c55e;
+            color: white;
+            box-shadow: 0 4px 15px rgba(34, 197, 94, 0.2);
+        }
+        .btn-green:hover { background-color: #16a34a; }
+        .btn-orange {
+            background-color: #f97316;
+            color: white;
+            box-shadow: 0 4px 15px rgba(249, 115, 22, 0.2);
+        }
+        .btn-orange:hover { background-color: #ea580c; }
+        .btn-blue {
+            background-color: #3b82f6;
+            color: white;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2);
+        }
+        .btn-blue:hover { background-color: #2563eb; }
+        .btn-red {
+            background-color: #ef4444;
+            color: white;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.2);
+        }
+        .btn-red:hover { background-color: #dc2626; }
+        .current-exercise-card {
+            border: 2px solid #e53e3e;
+            box-shadow: 0 0 10px rgba(229, 62, 62, 0.5), 0 0 20px rgba(229, 62, 62, 0.2);
+            animation: pulse-border 1.5s infinite;
+        }
+        @keyframes pulse-border {
+            0% { box-shadow: 0 0 5px rgba(229, 62, 62, 0.5), 0 0 10px rgba(229, 62, 62, 0.2); }
+            50% { box-shadow: 0 0 15px rgba(229, 62, 62, 0.8), 0 0 25px rgba(229, 62, 62, 0.4); }
+            100% { box-shadow: 0 0 5px rgba(229, 62, 62, 0.5), 0 0 10px rgba(229, 62, 62, 0.2); }
+        }
+        .timer-ring-bg {
+            stroke: rgba(255, 255, 255, 0.1);
+            stroke-width: 10;
+        }
+        .timer-ring-fg {
+            stroke: #e53e3e;
+            stroke-width: 10;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 1s linear;
+        }
+        .exercise-list-item {
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .exercise-list-item.active {
+            background-color: rgba(255, 45, 45, 0.1);
+            border-color: #ff2d2d;
+        }
+        .website-name {
+            font-weight: 800;
+            font-size: 1.5rem;
+            letter-spacing: -1px;
+            color: #f0f0f0;
+        }
+        .website-name .ai-part {
+            color: #e53e3e;
+            font-style: italic;
+        }
+        select {
+            background-color: #1a1a1a;
+            color: white;
+            border: 1px solid #444;
+            border-radius: 0.5rem;
+            padding: 0.5rem;
+            font-size: 0.875rem;
+            margin-right: 0.5rem;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 text-white antialiased">
+
+    <div class="absolute top-0 left-0 w-full h-full bg-black"></div>
+
+    <div id="app" class="relative z-10">
+
+        <header class="flex justify-between items-center mb-6">
+            <a href="Workout_Tracker.html" class="flex items-center gap-2 text-slate-300 hover:text-white transition-colors">
+                <i data-lucide="arrow-left" class="w-6 h-6"></i>
+                <span>Routine Builder</span>
+            </a>
+            <h1 class="website-name">s<span class="ai-part">AI</span>hat</h1>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <div class="lg:col-span-2 space-y-6">
+                <div class="card-bg p-6 rounded-xl">
+                    <p class="text-slate-400 text-sm mb-1">Workout Player</p>
+                    <h2 class="text-3xl font-bold gradient-text-red neon-glow-text">Current</h2>
+                </div>
+
+                <div class="card-bg p-6 rounded-xl flex flex-col md:flex-row gap-6 items-center">
+                    <div class="flex flex-col items-center flex-1 text-center space-y-4">
+                        <div class="relative w-48 h-48">
+                            <svg class="w-full h-full" viewBox="0 0 120 120">
+                                <circle cx="60" cy="60" r="54" class="timer-ring-bg" />
+                                <circle cx="60" cy="60" r="54" id="timer-progress" class="timer-ring-fg" />
+                            </svg>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                <span id="timer-display" class="text-5xl font-extrabold gradient-text-red">00:00</span>
+                                <span class="text-slate-400 font-medium text-sm">Idle</span>
+                            </div>
+                        </div>
+                        <h3 class="text-4xl font-extrabold" id="current-exercise-name">Loading...</h3>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 flex-1 w-full md:w-auto">
+                        <button class="control-button btn-green" id="start-resume-btn"><i data-lucide="play" class="w-5 h-5 mr-2"></i> Start / Resume</button>
+                        <button class="control-button btn-orange" id="skip-btn"><i data-lucide="skip-forward" class="w-5 h-5 mr-2"></i> Skip</button>
+                        <button class="control-button btn-blue" id="stop-btn"><i data-lucide="square" class="w-5 h-5 mr-2"></i> Stop</button>
+                        <button class="control-button btn-red" id="exit-btn"><i data-lucide="x-circle" class="w-5 h-5 mr-2"></i> Exit</button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="card-bg p-4 rounded-xl flex items-center justify-center aspect-video">
+                        <div class="text-center">
+                            <p class="text-lg font-bold">AI Avatar</p>
+                            <p class="text-sm text-slate-400">(D-ID video here)</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 gap-4">
+                        <button class="control-button btn-blue"><i data-lucide="message-square" class="w-5 h-5 mr-2"></i> Motivational Cue</button>
+                        <div class="flex items-center space-x-2">
+                           <select id="language-select" class="flex-1">
+                               <option value="en-US">English</option>
+                               <option value="hi-IN">Hindi</option>
+                           </select>
+                           <button class="control-button flex-1" id="voice-control-btn" data-active="false">
+                               <i data-lucide="mic" class="w-5 h-5 mr-2"></i> Voice Control
+                           </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-1 space-y-6">
+                <div class="card-bg p-4 rounded-xl">
+                    <h3 class="text-lg font-bold mb-4">Upcoming</h3>
+                    <ul id="upcoming-list" class="space-y-3">
+                        </ul>
+                    <p id="exercise-count" class="text-sm text-slate-400 mt-4">Exercises: 0</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        lucide.createIcons();
+        document.addEventListener('DOMContentLoaded', function() {
+            let workoutPlan = JSON.parse(localStorage.getItem('activeWorkout')) || [];
+            let currentExerciseIndex = parseInt(localStorage.getItem('workoutIndex')) || 0;
+
+            const timerDisplay = document.getElementById('timer-display');
+            const startResumeBtn = document.getElementById('start-resume-btn');
+            const stopBtn = document.getElementById('stop-btn');
+            const skipBtn = document.getElementById('skip-btn');
+            const exitBtn = document.getElementById('exit-btn');
+            const timerProgress = document.getElementById('timer-progress');
+            const currentExerciseName = document.getElementById('current-exercise-name');
+            const upcomingList = document.getElementById('upcoming-list');
+            const exerciseCount = document.getElementById('exercise-count');
+            const voiceControlBtn = document.getElementById('voice-control-btn');
+            const languageSelect = document.getElementById('language-select');
+
+            let timerInterval;
+            let totalTime = 60;
+            let timeLeft = totalTime;
+            let isRunning = false;
+            let isVoiceControlActive = false;
+            let recognition;
+
+            // Debounce for voice commands
+            let lastCommandTime = 0;
+            const debounceDelay = 500;
+
+            function updateUpcomingList() {
+                upcomingList.innerHTML = '';
+                if (workoutPlan.length === 0 || currentExerciseIndex >= workoutPlan.length) {
+                    currentExerciseName.textContent = 'Workout Complete!';
+                    upcomingList.innerHTML = `<li class="exercise-list-item text-slate-400">No exercises in plan.</li>`;
+                    exerciseCount.textContent = `Exercises: 0`;
+                    return;
+                }
+                
+                currentExerciseName.textContent = workoutPlan[currentExerciseIndex].name;
+                exerciseCount.textContent = `Exercises: ${workoutPlan.length - currentExerciseIndex}`;
+
+                workoutPlan.slice(currentExerciseIndex).forEach((exercise, index) => {
+                    const li = document.createElement('li');
+                    li.className = `exercise-list-item ${index === 0 ? 'active current-exercise' : ''}`;
+                    li.innerHTML = `
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="dumbbell" class="w-5 h-5 ${index === 0 ? 'text-red-500' : 'text-slate-400'}"></i>
+                            <span class="${index === 0 ? 'text-white font-semibold' : 'text-slate-300'}">${exercise.name}</span>
+                        </div>
+                        ${index === 0 ? '<span class="w-2 h-2 bg-yellow-400 rounded-full"></span>' : '<span class="text-sm text-slate-500">Queued</span>'}
+                    `;
+                    upcomingList.appendChild(li);
+                });
+
+                lucide.createIcons();
+            }
+
+            function startTimer() {
+                if (!isRunning && currentExerciseIndex < workoutPlan.length) {
+                    isRunning = true;
+                    timerInterval = setInterval(() => {
+                        timeLeft--;
+                        if (timeLeft < 0) {
+                            stopTimer();
+                            nextExercise();
+                        }
+                        updateTimerDisplay();
+                        updateProgressRing();
+                    }, 1000);
+                }
+            }
+
+            function stopTimer() {
+                clearInterval(timerInterval);
+                isRunning = false;
+            }
+
+            // Replace the existing nextExercise() function with this new version
+            function nextExercise() {
+                stopTimer();
+                
+                // Log the completed exercise to the daily plan
+                const today = new Date().toISOString().split('T')[0];
+                let dailyWorkouts = JSON.parse(localStorage.getItem('dailyWorkouts')) || {};
+                if (!dailyWorkouts[today]) {
+                    dailyWorkouts[today] = { exercises: [], completed: [] };
+                }
+
+                const completedExercise = workoutPlan[currentExerciseIndex];
+                if (completedExercise && !dailyWorkouts[today].completed.includes(completedExercise.name)) {
+                    dailyWorkouts[today].completed.push(completedExercise.name);
+                    localStorage.setItem('dailyWorkouts', JSON.stringify(dailyWorkouts));
+                }
+
+                currentExerciseIndex++;
+                localStorage.setItem('workoutIndex', currentExerciseIndex);
+
+                if (currentExerciseIndex < workoutPlan.length) {
+                    timeLeft = totalTime;
+                    updateUpcomingList();
+                    updateTimerDisplay();
+                    updateProgressRing();
+                    startTimer();
+                } else {
+                    alert('Workout complete!');
+                    localStorage.removeItem('activeWorkout');
+                    localStorage.removeItem('workoutIndex');
+                    window.location.href = 'Workout_Tracker.html';
+                }
+            }
+
+            function updateTimerDisplay() {
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            }
+
+            function updateProgressRing() {
+                const radius = timerProgress.r.baseVal.value;
+                const circumference = 2 * Math.PI * radius;
+                const offset = circumference - (timeLeft / totalTime) * circumference;
+                timerProgress.style.strokeDasharray = `${circumference} ${circumference}`;
+                timerProgress.style.strokeDashoffset = offset;
+            }
+
+            startResumeBtn.addEventListener('click', () => {
+                if (isRunning) {
+                    stopTimer();
+                    startResumeBtn.innerHTML = '<i data-lucide="play" class="w-5 h-5 mr-2"></i> Start / Resume';
+                } else {
+                    startTimer();
+                    startResumeBtn.innerHTML = '<i data-lucide="pause" class="w-5 h-5 mr-2"></i> Pause';
+                }
+                lucide.createIcons();
+            });
+
+            stopBtn.addEventListener('click', () => {
+                stopTimer();
+                timeLeft = totalTime;
+                updateTimerDisplay();
+                updateProgressRing();
+                startResumeBtn.innerHTML = '<i data-lucide="play" class="w-5 h-5 mr-2"></i> Start / Resume';
+                lucide.createIcons();
+            });
+
+            skipBtn.addEventListener('click', () => {
+                nextExercise();
+            });
+            
+            exitBtn.addEventListener('click', () => {
+                localStorage.removeItem('activeWorkout');
+                localStorage.removeItem('workoutIndex');
+                window.location.href = 'Workout_Tracker.html';
+            });
+
+            // Voice Control Logic
+            if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = new SpeechRecognition();
+                recognition.continuous = true;
+                recognition.interimResults = false;
+                recognition.lang = languageSelect.value;
+
+                languageSelect.addEventListener('change', () => {
+                    recognition.lang = languageSelect.value;
+                });
+
+                recognition.onresult = function(event) {
+                    const currentTime = Date.now();
+                    if (currentTime - lastCommandTime < debounceDelay) {
+                        return;
+                    }
+                    lastCommandTime = currentTime;
+
+                    const transcript = event.results[event.results.length - 1][0].transcript.trim().toLowerCase();
+                    console.log('Voice command heard:', transcript);
+                    
+                    const commands = {
+                        'en-US': { start: ['start', 'resume'], pause: ['pause'], skip: ['skip', 'next'], stop: ['stop'], exit: ['exit'] },
+                        'hi-IN': { start: ['शुरू करो', 'फिर से शुरू करो'], pause: ['रोको'], skip: ['छोड़ो', 'अगला'], stop: ['रुको'], exit: ['बाहर निकलो', 'बंद करो'] }
+                    };
+
+                    const selectedLang = languageSelect.value;
+                    const langCommands = commands[selectedLang];
+
+                    if (langCommands.start.includes(transcript)) {
+                        startResumeBtn.click();
+                    } else if (langCommands.pause.includes(transcript)) {
+                        startResumeBtn.click();
+                    } else if (langCommands.skip.includes(transcript)) {
+                        skipBtn.click();
+                    } else if (langCommands.stop.includes(transcript)) {
+                        stopBtn.click();
+                    } else if (langCommands.exit.includes(transcript)) {
+                        exitBtn.click();
+                    }
+                };
+                
+                recognition.onend = function() {
+                    if (isVoiceControlActive) {
+                        recognition.start();
+                    }
+                };
+
+                recognition.onerror = function(event) {
+                    console.error('Speech recognition error:', event.error);
+                    if (isVoiceControlActive) {
+                        recognition.start();
+                    }
+                };
+
+                voiceControlBtn.addEventListener('click', () => {
+                    isVoiceControlActive = !isVoiceControlActive;
+                    if (isVoiceControlActive) {
+                        recognition.start();
+                        voiceControlBtn.innerHTML = '<i data-lucide="mic-off" class="w-5 h-5 mr-2"></i> Stop Listening';
+                        voiceControlBtn.classList.add('bg-green-500', 'hover:bg-green-600');
+                        voiceControlBtn.classList.remove('bg-gray-800', 'hover:bg-gray-700');
+                        console.log('Voice control activated.');
+                    } else {
+                        recognition.stop();
+                        voiceControlBtn.innerHTML = '<i data-lucide="mic" class="w-5 h-5 mr-2"></i> Voice Control';
+                        voiceControlBtn.classList.remove('bg-green-500', 'hover:bg-green-600');
+                        voiceControlBtn.classList.add('bg-gray-800', 'hover:bg-gray-700');
+                        console.log('Voice control deactivated.');
+                    }
+                    lucide.createIcons();
+                });
+            } else {
+                voiceControlBtn.style.display = 'none';
+                languageSelect.style.display = 'none';
+                console.warn('Web Speech API is not supported in this browser.');
+            }
+            
+            if (workoutPlan.length > 0) {
+                updateUpcomingList();
+                updateTimerDisplay();
+                updateProgressRing();
+            } else {
+                window.location.href = 'Workout_Tracker.html';
+            }
+        });
+    </script>
+</body>
+</html>

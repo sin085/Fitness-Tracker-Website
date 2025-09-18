@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>sAIhat - Smart Nutrition Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #000000;
+        }
+        .gradient-text-red {
+            background: -webkit-linear-gradient(45deg, #ff2d2d, #ff7b7b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .neon-glow-text {
+            text-shadow: 0 0 5px rgba(255, 45, 45, 0.8), 0 0 10px rgba(255, 45, 45, 0.6);
+        }
+        .neon-glow-svg {
+            filter: drop-shadow(0 0 4px rgba(255, 45, 45, 0.8));
+        }
+        .card-bg {
+            background-color: rgba(17, 17, 17, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 45, 45, 0.2);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer; /* Added for clickable boxes */
+        }
+        .card-bg:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 15px rgba(255, 45, 45, 0.3);
+        }
+        .card-image {
+            transition: transform 0.5s ease;
+        }
+        .card-bg:hover .card-image {
+            transform: scale(1.05);
+        }
+        .progress-ring__circle {
+            transition: stroke-dashoffset 0.8s ease-out;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+        /* Animation for progress bars */
+        @keyframes progress-bar-anim {
+            from { width: 0%; }
+        }
+        .progress-bar-animated {
+            animation: progress-bar-anim 1.5s ease-out forwards;
+        }
+        /* Fade-in animation */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .fade-in-up {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+        /* Website name styling */
+        .website-name {
+            font-weight: 800;
+            font-size: 1.5rem; /* Adjusted for header */
+            letter-spacing: -1px;
+            color: #f0f0f0; /* Default to white for 's' and 'hat' */
+        }
+        .website-name .ai-part {
+            color: #e53e3e; /* Red color for 'AI' */
+            font-style: italic;
+        }
+        /* Footer styles (copied from Home/Progress) */
+        .footer-bg {
+             background-color: rgba(10, 10, 10, 0.8);
+            backdrop-filter: blur(12px);
+            border-top: 1px solid rgba(255, 45, 45, 0.3);
+        }
+        /* Sidebar styles (copied from Home/Progress) */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 280px; /* Adjust width as needed */
+            background-color: #1a1a1a;
+            border-right: 1px solid #333;
+            transform: translateX(-100%); /* Ensure it starts off-screen */
+            transition: transform 0.3s ease-out;
+            z-index: 1000;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar.open {
+            transform: translateX(0);
+        }
+        .sidebar-backdrop {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 999;
+        }
+        .sidebar-backdrop.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Footer active link style */
+        .footer-link.active {
+            color: #e53e3e; /* Red color */
+            text-shadow: 0 0 5px rgba(229, 62, 62, 0.8), 0 0 10px rgba(229, 62, 62, 0.6);
+        }
+    </style>
+</head>
+<body class="text-white antialiased">
+    <div class="absolute top-0 left-0 w-full h-full bg-black"></div>
+
+    <div id="app" class="relative z-10 pb-28 p-4">
+
+        <header class="flex justify-between items-center mb-6">
+            <div class="flex items-center gap-3 cursor-pointer" id="user-console-trigger">
+                <div class="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                    U
+                </div>
+                <div>
+                    <span class="text-xs text-slate-400">Welcome Back!</span>
+                    <h1 class="text-lg font-bold">User</h1>
+                </div>
+            </div>
+            <h1 class="website-name">s<span class="ai-part">AI</span>hat</h1>
+        </header>
+
+        <div class="card-bg p-6 rounded-2xl flex flex-col items-center justify-center fade-in-up mb-6">
+            <img src="https://images.unsplash.com/photo-1534972195531-d756b9bfa9f2?q=80&w=2070&auto=format&fit=crop" class="absolute inset-0 w-full h-full object-cover opacity-10 card-image" alt="Abstract background">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+            <div class="relative z-10 flex flex-col items-center">
+                <h2 class="text-lg font-semibold mb-4 text-slate-200">Calories Remaining</h2>
+                <div class="relative w-40 h-40">
+                    <svg class="w-full h-full" viewBox="0 0 120 120">
+                        <circle cx="60" cy="60" r="54" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="8" />
+                        <circle id="calorie-progress-ring" class="progress-ring__circle neon-glow-svg" cx="60" cy="60" r="54" fill="none" stroke="url(#calorieGradientRed)" stroke-width="8" stroke-linecap="round" />
+                        <defs>
+                            <linearGradient id="calorieGradientRed" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" style="stop-color:#ff2d2d;" />
+                                <stop offset="100%" style="stop-color:#ff7b7b;" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                    <div class="absolute inset-0 flex flex-col items-center justify-center">
+                        <span id="calories-remaining" class="text-4xl font-extrabold gradient-text-red neon-glow-text">700</span>
+                        <span class="text-slate-400 font-medium">kcal</span>
+                    </div>
+                </div>
+                <div class="w-full text-center mt-2">
+                       <p class="text-sm text-slate-300">Consumed: 1800 / Goal: 2500</p>
+                </div>
+            </div>
+        </div>
+
+
+        <main class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            <div class="card-bg p-6 rounded-2xl fade-in-up" style="animation-delay: 100ms;" onclick="window.location.href='Add_Food.html?meal=Breakfast';">
+                <img src="breakfast.jpeg" class="absolute inset-0 w-full h-full object-cover opacity-20 card-image" alt="Breakfast">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                <div class="relative z-10">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h2 class="text-xl font-bold">Breakfast</h2>
+                            <p class="text-sm text-slate-400 flex items-center gap-2"><i data-lucide="clock" class="w-4 h-4"></i> 8:30 AM</p>
+                        </div>
+                        <div class="bg-red-500/20 border border-red-500 text-red-300 text-xs font-bold px-3 py-1 rounded-full neon-glow-text">420 cal</div>
+                    </div>
+                    <ul class="space-y-2 mb-4">
+                        <li class="flex items-center gap-2 text-slate-300"><i data-lucide="check-circle-2" class="w-4 h-4 text-red-400"></i>2 Eggs</li>
+                        <li class="flex items-center gap-2 text-slate-300"><i data-lucide="check-circle-2" class="w-4 h-4 text-red-400"></i>Toast</li>
+                        <li class="flex items-center gap-2 text-slate-300"><i data-lucide="check-circle-2" class="w-4 h-4 text-red-400"></i>Avocado</li>
+                    </ul>
+                    <div class="space-y-3">
+                        <div class="text-xs">
+                            <div class="flex justify-between mb-1"><span class="text-slate-400">Protein</span><span>18g</span></div>
+                            <div class="w-full bg-gray-700/50 rounded-full h-1.5"><div class="bg-red-500 h-1.5 rounded-full progress-bar-animated" style="width: 40%"></div></div>
+                        </div>
+                        <div class="text-xs">
+                            <div class="flex justify-between mb-1"><span class="text-slate-400">Carbs</span><span>25g</span></div>
+                            <div class="w-full bg-gray-700/50 rounded-full h-1.5"><div class="bg-red-500 h-1.5 rounded-full progress-bar-animated" style="width: 30%"></div></div>
+                        </div>
+                        <div class="text-xs">
+                            <div class="flex justify-between mb-1"><span class="text-slate-400">Fats</span><span>15g</span></div>
+                            <div class="w-full bg-gray-700/50 rounded-full h-1.5"><div class="bg-red-500 h-1.5 rounded-full progress-bar-animated" style="width: 50%"></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-bg p-6 rounded-2xl fade-in-up" style="animation-delay: 200ms;" onclick="window.location.href='Add_Food.html?meal=Lunch';">
+                <img src="lunch image.jpg" class="absolute inset-0 w-full h-full object-cover opacity-20 card-image" alt="Lunch">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                <div class="relative z-10">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h2 class="text-xl font-bold">Lunch</h2>
+                            <p class="text-sm text-slate-400 flex items-center gap-2"><i data-lucide="clock" class="w-4 h-4"></i> 1:15 PM</p>
+                        </div>
+                        <div class="bg-red-500/20 border border-red-500 text-red-300 text-xs font-bold px-3 py-1 rounded-full neon-glow-text">650 cal</div>
+                    </div>
+                    <ul class="space-y-2 mb-4">
+                        <li class="flex items-center gap-2 text-slate-300"><i data-lucide="check-circle-2" class="w-4 h-4 text-red-400"></i>Chicken Salad</li>
+                        <li class="flex items-center gap-2 text-slate-300"><i data-lucide="check-circle-2" class="w-4 h-4 text-red-400"></i>Quinoa</li>
+                        <li class="flex items-center gap-2 text-slate-300"><i data-lucide="check-circle-2" class="w-4 h-4 text-red-400"></i>Vegetables</li>
+                    </ul>
+                    <div class="space-y-3">
+                        <div class="text-xs">
+                            <div class="flex justify-between mb-1"><span class="text-slate-400">Protein</span><span>35g</span></div>
+                            <div class="w-full bg-gray-700/50 rounded-full h-1.5"><div class="bg-red-500 h-1.5 rounded-full progress-bar-animated" style="width: 70%"></div></div>
+                        </div>
+                        <div class="text-xs">
+                            <div class="flex justify-between mb-1"><span class="text-slate-400">Carbs</span><span>45g</span></div>
+                            <div class="w-full bg-gray-700/50 rounded-full h-1.5"><div class="bg-red-500 h-1.5 rounded-full progress-bar-animated" style="width: 50%"></div></div>
+                        </div>
+                        <div class="text-xs">
+                            <div class="flex justify-between mb-1"><span class="text-slate-400">Fats</span><span>12g</span></div>
+                            <div class="w-full bg-gray-700/50 rounded-full h-1.5"><div class="bg-red-500 h-1.5 rounded-full progress-bar-animated" style="width: 40%"></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-bg p-6 rounded-2xl fade-in-up" style="animation-delay: 300ms;" onclick="window.location.href='Add_Food.html?meal=Snack';">
+                <img src="snacks.jpeg" class="absolute inset-0 w-full h-full object-cover opacity-20 card-image" alt="Snack">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                <div class="relative z-10">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h2 class="text-xl font-bold">Snack</h2>
+                            <p class="text-sm text-slate-400 flex items-center gap-2"><i data-lucide="clock" class="w-4 h-4"></i> 4:00 PM</p>
+                        </div>
+                        <div class="bg-red-500/20 border border-red-500 text-red-300 text-xs font-bold px-3 py-1 rounded-full neon-glow-text">180 cal</div>
+                    </div>
+                    <ul class="space-y-2 mb-4">
+                        <li class="flex items-center gap-2 text-slate-300"><i data-lucide="check-circle-2" class="w-4 h-4 text-red-400"></i>Greek Yogurt</li>
+                        <li class="flex items-center gap-2 text-slate-300"><i data-lucide="check-circle-2" class="w-4 h-4 text-red-400"></i>Berries</li>
+                    </ul>
+                    <div class="space-y-3">
+                        <div class="text-xs">
+                            <div class="flex justify-between mb-1"><span class="text-slate-400">Protein</span><span>15g</span></div>
+                            <div class="w-full bg-gray-700/50 rounded-full h-1.5"><div class="bg-red-500 h-1.5 rounded-full progress-bar-animated" style="width: 30%"></div></div>
+                        </div>
+                        <div class="text-xs">
+                            <div class="flex justify-between mb-1"><span class="text-slate-400">Carbs</span><span>20g</span></div>
+                            <div class="w-full bg-gray-700/50 rounded-full h-1.5"><div class="bg-red-500 h-1.5 rounded-full progress-bar-animated" style="width: 25%"></div></div>
+                        </div>
+                        <div class="text-xs">
+                            <div class="flex justify-between mb-1"><span class="text-slate-400">Fats</span><span>3g</span></div>
+                            <div class="w-full bg-gray-700/50 rounded-full h-1.5"><div class="bg-red-500 h-1.5 rounded-full progress-bar-animated" style="width: 15%"></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-bg p-6 rounded-2xl fade-in-up" style="animation-delay: 400ms;" onclick="window.location.href='Add_Food.html?meal=Dinner';">
+                <img src="dinner.jpg" class="absolute inset-0 w-full h-full object-cover opacity-20 card-image" alt="Dinner">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                <div class="relative z-10">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h2 class="text-xl font-bold">Dinner</h2>
+                            <p class="text-sm text-slate-400 flex items-center gap-2"><i data-lucide="clock" class="w-4 h-4"></i> 7:30 PM</p>
+                        </div>
+                        <div class="bg-red-500/20 border border-red-500 text-red-300 text-xs font-bold px-3 py-1 rounded-full neon-glow-text">550 cal</div>
+                    </div>
+                    <ul class="space-y-2 mb-4">
+                        <li class="flex items-center gap-2 text-slate-300"><i data-lucide="check-circle-2" class="w-4 h-4 text-red-400"></i>Salmon</li>
+                        <li class="flex items-center gap-2 text-slate-300"><i data-lucide="check-circle-2" class="w-4 h-4 text-red-400"></i>Brown Rice</li>
+                        <li class="flex items-center gap-2 text-slate-300"><i data-lucide="check-circle-2" class="w-4 h-4 text-red-400"></i>Asparagus</li>
+                    </ul>
+                    <div class="space-y-3">
+                        <div class="text-xs">
+                            <div class="flex justify-between mb-1"><span class="text-slate-400">Protein</span><span>40g</span></div>
+                            <div class="w-full bg-gray-700/50 rounded-full h-1.5"><div class="bg-red-500 h-1.5 rounded-full progress-bar-animated" style="width: 80%"></div></div>
+                        </div>
+                        <div class="text-xs">
+                            <div class="flex justify-between mb-1"><span class="text-slate-400">Carbs</span><span>50g</span></div>
+                            <div class="w-full bg-gray-700/50 rounded-full h-1.5"><div class="bg-red-500 h-1.5 rounded-full progress-bar-animated" style="width: 55%"></div></div>
+                        </div>
+                        <div class="text-xs">
+                            <div class="flex justify-between mb-1"><span class="text-slate-400">Fats</span><span>20g</span></div>
+                            <div class="w-full bg-gray-700/50 rounded-full h-1.5"><div class="bg-red-500 h-1.5 rounded-full progress-bar-animated" style="width: 60%"></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <footer class="fixed bottom-0 left-0 right-0 footer-bg p-2 flex justify-around">
+            <a href="Home.html" id="home-link" class="footer-link flex flex-col items-center justify-center text-slate-400 hover:text-red-500 w-1/4 py-1 transition-colors">
+                <i data-lucide="home" class="w-6 h-6 mb-1"></i>
+                <span class="text-xs font-medium">Home</span>
+            </a>
+            <a href="Progress.html" id="progress-link" class="footer-link flex flex-col items-center justify-center text-slate-400 hover:text-red-500 w-1/4 py-1 transition-colors">
+                <i data-lucide="bar-chart-3" class="w-6 h-6 mb-1"></i>
+                <span class="text-xs font-medium">Progress</span>
+            </a>
+               <a href="Smart_Nutrition_Tracker.html" id="food-link" class="footer-link flex flex-col items-center justify-center text-slate-400 hover:text-red-500 w-1/4 py-1 transition-colors">
+                <i data-lucide="carrot" class="w-6 h-6 mb-1"></i>
+                <span class="text-xs font-medium">Food</span>
+            </a>
+            <a href="Workout_Tracker.html" id="workouts-link" class="footer-link flex flex-col items-center justify-center text-slate-400 hover:text-red-500 w-1/4 py-1 transition-colors">
+                <i data-lucide="dumbbell" class="w-6 h-6 mb-1"></i>
+                <span class="text-xs font-medium">Workouts</span>
+            </a>
+        </footer>
+    </div>
+    <div id="user-sidebar" class="sidebar">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-xl font-bold">User Profile</h3>
+            <button id="close-sidebar-button" class="text-slate-400 hover:text-white">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+        </div>
+        <nav class="flex-grow">
+            <ul>
+                <li class="mb-4">
+                    <a href="Home.html" id="dashboard-link" class="footer-link flex items-center text-lg text-slate-300 hover:text-red-500 transition-colors">
+                        <i data-lucide="layout-dashboard" class="w-5 h-5 mr-3"></i> Dashboard
+                    </a>
+                </li>
+                <li class="mb-4">
+                    <a href="Profile.html" id="profile-link-sidebar" class="footer-link flex items-center text-lg text-slate-300 hover:text-red-500 transition-colors">
+                        <i data-lucide="user" class="w-5 h-5 mr-3"></i> Profile
+                    </a>
+                </li>
+                <li class="mb-4">
+                    <a href="#" class="footer-link flex items-center text-lg text-slate-300 hover:text-red-500 transition-colors">
+                        <i data-lucide="settings" class="w-5 h-5 mr-3"></i> Settings
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="footer-link flex items-center text-lg text-slate-300 hover:text-red-500 transition-colors">
+                        <i data-lucide="shield" class="w-5 h-5 mr-3"></i> Privacy Notices
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        <div class="mt-auto pt-6 border-t border-gray-700">
+            <button class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded-lg transition-colors" onclick="window.location.href='Login.html'">
+                Logout
+            </button>
+        </div>
+    </div>
+    <div id="sidebar-backdrop" class="sidebar-backdrop"></div>
+
+
+    <script>
+        lucide.createIcons();
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Calorie Progress Ring Logic
+            const circle = document.getElementById('calorie-progress-ring');
+            const calorieEl = document.getElementById('calories-remaining');
+            const calorieGoal = 2500;
+            const caloriesConsumed = 1800; // Sum of all meals
+            const remaining = calorieGoal - caloriesConsumed;
+
+            const radius = circle.r.baseVal.value;
+            const circumference = 2 * Math.PI * radius;
+            
+            circle.style.strokeDasharray = `${circumference} ${circumference}`;
+            circle.style.strokeDashoffset = circumference;
+
+            function setProgress(consumed, goal) {
+                const percentRemaining = (goal - consumed) / goal;
+                const offset = circumference - (percentRemaining < 0 ? 0 : percentRemaining) * circumference;
+                circle.style.strokeDashoffset = offset;
+            }
+            
+            // Animate the ring
+            setTimeout(() => setProgress(caloriesConsumed, calorieGoal), 300);
+
+            // Calorie Counter Animation
+            const endValue = remaining;
+            const duration = 1500; // ms
+            const frameRate = 1000 / 60; // 60 fps
+            const totalFrames = Math.round(duration / frameRate);
+            const initialCalorieValue = parseInt(calorieEl.textContent); // Get initial value from HTML
+            let currentCalorieValue = 0;
+
+            const counter = setInterval(() => {
+                frame++;
+                const progress = frame / totalFrames;
+                // Animate from 0 to endValue
+                currentCalorieValue = Math.round(endValue * progress);
+                calorieEl.textContent = currentCalorieValue;
+
+                if (frame === totalFrames) {
+                    clearInterval(counter);
+                    calorieEl.textContent = endValue; // Ensure it ends on the exact number
+                }
+            }, frameRate);
+
+            // --- Sidebar Logic (Copied from Home.html and Progress.html) ---
+            const userConsoleTrigger = document.getElementById('user-console-trigger');
+            const userSidebar = document.getElementById('user-sidebar');
+            const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+            const closeSidebarButton = document.getElementById('close-sidebar-button');
+
+            function openSidebar() {
+                userSidebar.classList.add('open');
+                sidebarBackdrop.classList.add('open');
+            }
+
+            function closeSidebar() {
+                userSidebar.classList.remove('open');
+                sidebarBackdrop.classList.remove('open');
+            }
+
+            userConsoleTrigger.addEventListener('click', openSidebar);
+            closeSidebarButton.addEventListener('click', closeSidebar);
+            sidebarBackdrop.addEventListener('click', closeSidebar);
+
+            // --- Footer Active State Logic ---
+            const currentPath = window.location.pathname.split('/').pop(); // Get current HTML file name
+            document.querySelectorAll('.footer-link').forEach(link => {
+                const linkHref = link.getAttribute('href');
+                if (linkHref === currentPath) {
+                    link.classList.add('active');
+                } else if (currentPath === '' && linkHref === 'Home.html') { // Handle default Home page for root URL
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
